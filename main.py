@@ -8,3 +8,5 @@ import earthpy.spatial as es
 import earthpy.plot as ep
 
 
+d = {}
+
