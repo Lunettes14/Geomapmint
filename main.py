@@ -19,6 +19,7 @@ def _read_dataset(size, path, begin):
                 return False
     return True
 
+
 def _is_compatible(size, path, begin):
     if _read_dataset(size, path, begin):
         for j in range(0, 29 * int(math.sqrt(size)), 29):
@@ -33,13 +34,6 @@ def _is_compatible(size, path, begin):
         return False
 
 
-# def draw_picture(size, path, begin):
-#     if _is_compatible(size, path, begin):
-#         p =[]
-
-
-
-
 def _are_vertical_neighbours(top, bottom):
     p1 = rasterio.open(path + f'{top}.tif').bounds[3]
     p2 = rasterio.open(path + f'{bottom}.tif').bounds[1]
@@ -48,6 +42,7 @@ def _are_vertical_neighbours(top, bottom):
     else:
         return False
 
+    
 def _are_horizontal_neighbours(left, right):
     p1 = rasterio.open(path + f'{left}.tif').bounds[0]
     p2 = rasterio.open(path + f'{right}.tif').bounds[2]
