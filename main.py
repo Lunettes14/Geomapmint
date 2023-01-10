@@ -42,7 +42,7 @@ def _are_vertical_neighbours(top, bottom):
     else:
         return False
 
-    
+
 def _are_horizontal_neighbours(left, right):
     p1 = rasterio.open(path + f'{left}.tif').bounds[0]
     p2 = rasterio.open(path + f'{right}.tif').bounds[2]
