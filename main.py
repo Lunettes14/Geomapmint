@@ -9,7 +9,6 @@ import earthpy.plot as ep
 import matplotlib.pyplot as plt
 
 
-d = {}
 path = r'/home/aina/PycharmProjects/geomapmint/s2_21/ROIs2017_winter_s2_21_p'
 
 
