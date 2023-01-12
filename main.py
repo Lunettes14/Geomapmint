@@ -94,4 +94,4 @@ def combine(size, path, begin):
 
 s2 = combine(841, path, 30)
 ep.plot_rgb(s2, rgb=[3, 2, 1])
-print('ну допустим я хочу без форс пуша')
+print('ну допустим я хочу без форс пуш')
