@@ -94,3 +94,4 @@ def combine(size, path, begin):
 
 s2 = combine(841, path, 30)
 ep.plot_rgb(s2, rgb=[3, 2, 1])
+print('push please')
