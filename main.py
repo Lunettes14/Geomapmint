@@ -2,15 +2,12 @@ import math
 import os
 from copy import deepcopy
 import numpy as np
-import pylab as p
 import rasterio
-import earthpy as et
-import earthpy.spatial as es
 import earthpy.plot as ep
-import matplotlib.pyplot as plt
-from rasterio.plot import show
 
 path = r'/home/aina/PycharmProjects/geomapmint/s2_21/ROIs2017_winter_s2_21_p'
+dim_two_pics_with_intersection = 3840
+dim_bands = 13
 
 
 def read_dataset(size, path, begin):
@@ -40,7 +37,7 @@ def are_vertical_neighbours(top, bottom):
         q1 = src.bounds[3]
     with rasterio.open(path + f'{bottom}.tif') as src:
         q2 = src.bounds[1]
-    if q1 - q2 == 3840:
+    if q1 - q2 == dim_two_pics_with_intersection:
         return True
     else:
         return False
@@ -49,7 +46,7 @@ def are_vertical_neighbours(top, bottom):
 def are_horizontal_neighbours(left, right):
     p1 = rasterio.open(path + f'{left}.tif').bounds[0]
     p2 = rasterio.open(path + f'{right}.tif').bounds[2]
-    if p2 - p1 == 3840:
+    if p2 - p1 == dim_two_pics_with_intersection:
         return True
     else:
         return False
@@ -64,31 +61,31 @@ def where_missing(size, path, begin):
     return p
 
 
+def generate_base(size):
+    dim_matrix_2d = 128 * int(math.sqrt(size) + 1)
+    dim_3d = (dim_bands, dim_matrix_2d, dim_matrix_2d)
+    return np.zeros(dim_3d)
+
+
 def combine(size, path, begin):
-    dim = (13, 128 * int(math.sqrt(size) + 1), 128 * int(math.sqrt(size) + 1))
-    combined = np.zeros(dim)
+    combined = generate_base(size)
     for j in range(int(math.sqrt(size))):
         for i in range(int(math.sqrt(size))):
-            if os.path.exists(path + f'{begin + j + 29 * i}.tif'):
-                if i + j == 0:
-                    with rasterio.open(path + f'{begin + j + 29 * i}.tif') as src:
-                        p00 = src.read()
-                        combined[:, 0:256, 0:256] = deepcopy(p00[:, 0:256, 0:256])
-                elif j == 0:
-                    with rasterio.open(path + f'{begin + j + 29 * i}.tif') as src:
-                        p0n = src.read()
+            pic_number_str = f'{begin + j + 29 * i}.tif'
+            if os.path.exists(path + pic_number_str):
+                with rasterio.open(path + pic_number_str) as src:
+                    src_r = src.read()
+                    if i + j == 0:
+                        combined[:, 0:256, 0:256] = deepcopy(src_r[:, 0:256, 0:256])
+                    elif j == 0:
                         combined[:, 256 + 128 * (i - 1): 256 + 128 * i, 0:256] = deepcopy(
-                            p0n[:, 128:256, 0:256])  # Нижняя полоса
-                elif i == 0:
-                    with rasterio.open(path + f'{begin + j + 29 * i}.tif') as src:
-                        pn0 = src.read()
+                            src_r[:, 128:256, 0:256])  # Нижняя полоса
+                    elif i == 0:
                         combined[:, 0:256, 256 + 128 * (j - 1): 256 + 128 * j] = deepcopy(
-                            pn0[:, 0:256, 128:256])  # Правая полоса
-                else:
-                    with rasterio.open(path + f'{begin + j + 29 * i}.tif') as src:
-                        pnn = src.read()
+                            src_r[:, 0:256, 128:256])  # Правая полоса
+                    else:
                         combined[:, 256 + 128 * (i - 1): 256 + 128 * i, 256 + 128 * (j - 1): 256 + 128 * j] = deepcopy(
-                            pnn[:, 128:256, 128:256])
+                            src_r[:, 128:256, 128:256])
     return combined
 
 
