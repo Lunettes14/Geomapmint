@@ -67,6 +67,20 @@ def generate_base(size):
     return np.zeros(dim_3d)
 
 
+def cut_piece(i, j, src_r, combined):
+    match i, j:
+        case 0, 0:
+            combined[:, 0:256, 0:256] = deepcopy(src_r[:, 0:256, 0:256])
+        case 0, j:
+            combined[:, 0:256, 256 + 128 * (j - 1): 256 + 128 * j] = deepcopy(src_r[:, 0:256, 128:256])
+        case i, 0:
+            combined[:, 256 + 128 * (i - 1): 256 + 128 * i, 0:256] = deepcopy(src_r[:, 128:256, 0:256])
+        case i, j:
+            combined[:, 256 + 128 * (i - 1): 256 + 128 * i, 256 + 128 * (j - 1): 256 + 128 * j] = deepcopy(
+                src_r[:, 128:256, 128:256])
+    return combined
+
+
 def combine(size, path, begin):
     combined = generate_base(size)
     for j in range(int(math.sqrt(size))):
@@ -75,17 +89,7 @@ def combine(size, path, begin):
             if os.path.exists(path + pic_number_str):
                 with rasterio.open(path + pic_number_str) as src:
                     src_r = src.read()
-                    if i + j == 0:
-                        combined[:, 0:256, 0:256] = deepcopy(src_r[:, 0:256, 0:256])
-                    elif j == 0:
-                        combined[:, 256 + 128 * (i - 1): 256 + 128 * i, 0:256] = deepcopy(
-                            src_r[:, 128:256, 0:256])  # Нижняя полоса
-                    elif i == 0:
-                        combined[:, 0:256, 256 + 128 * (j - 1): 256 + 128 * j] = deepcopy(
-                            src_r[:, 0:256, 128:256])  # Правая полоса
-                    else:
-                        combined[:, 256 + 128 * (i - 1): 256 + 128 * i, 256 + 128 * (j - 1): 256 + 128 * j] = deepcopy(
-                            src_r[:, 128:256, 128:256])
+                    combined = cut_piece(i, j, src_r, combined)
     return combined
 
 
