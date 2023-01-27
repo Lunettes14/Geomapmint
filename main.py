@@ -6,8 +6,11 @@ import rasterio
 import earthpy.plot as ep
 
 path = r'/home/aina/PycharmProjects/geomapmint/s2_21/ROIs2017_winter_s2_21_p'
-dim_two_pics_with_intersection = 3840
-dim_bands = 13
+S2_BANDS = 13
+S2_LEN = 256
+S2_LEN_HALF = int(S2_LEN / 2)
+S2_SCALE = 10
+S2_LEN_INTERSECTION = int((S2_LEN + S2_LEN_HALF) * S2_SCALE)
 
 
 def read_dataset(size, path, begin):
@@ -37,7 +40,7 @@ def are_vertical_neighbours(top, bottom):
         q1 = src.bounds[3]
     with rasterio.open(path + f'{bottom}.tif') as src:
         q2 = src.bounds[1]
-    if q1 - q2 == dim_two_pics_with_intersection:
+    if q1 - q2 == S2_LEN_INTERSECTION:
         return True
     else:
         return False
@@ -46,7 +49,7 @@ def are_vertical_neighbours(top, bottom):
 def are_horizontal_neighbours(left, right):
     p1 = rasterio.open(path + f'{left}.tif').bounds[0]
     p2 = rasterio.open(path + f'{right}.tif').bounds[2]
-    if p2 - p1 == dim_two_pics_with_intersection:
+    if p2 - p1 == S2_LEN_INTERSECTION:
         return True
     else:
         return False
@@ -62,22 +65,22 @@ def where_missing(size, path, begin):
 
 
 def generate_base(size):
-    dim_matrix_2d = 128 * int(math.sqrt(size) + 1)
-    dim_3d = (dim_bands, dim_matrix_2d, dim_matrix_2d)
+    dim_matrix_2d = S2_LEN_HALF * int(math.sqrt(size) + 1)
+    dim_3d = (S2_BANDS, dim_matrix_2d, dim_matrix_2d)
     return np.zeros(dim_3d)
 
 
 def cut_piece(i, j, src_r, combined):
     match i, j:
         case 0, 0:
-            combined[:, 0:256, 0:256] = deepcopy(src_r[:, 0:256, 0:256])
+            combined[:, 0:S2_LEN, 0:S2_LEN] = deepcopy(src_r[:, 0:S2_LEN, 0:S2_LEN])
         case 0, j:
-            combined[:, 0:256, 256 + 128 * (j - 1): 256 + 128 * j] = deepcopy(src_r[:, 0:256, 128:256])
+            combined[:, 0:S2_LEN, S2_LEN + S2_LEN_HALF * (j - 1): S2_LEN + S2_LEN_HALF * j] = deepcopy(src_r[:, 0:S2_LEN, S2_LEN_HALF:S2_LEN])
         case i, 0:
-            combined[:, 256 + 128 * (i - 1): 256 + 128 * i, 0:256] = deepcopy(src_r[:, 128:256, 0:256])
+            combined[:, S2_LEN + S2_LEN_HALF * (i - 1): S2_LEN + S2_LEN_HALF * i, 0:S2_LEN] = deepcopy(src_r[:, S2_LEN_HALF:S2_LEN, 0:S2_LEN])
         case i, j:
-            combined[:, 256 + 128 * (i - 1): 256 + 128 * i, 256 + 128 * (j - 1): 256 + 128 * j] = deepcopy(
-                src_r[:, 128:256, 128:256])
+            combined[:, S2_LEN + S2_LEN_HALF * (i - 1): S2_LEN + S2_LEN_HALF * i, S2_LEN + S2_LEN_HALF * (j - 1): S2_LEN + S2_LEN_HALF * j] = deepcopy(
+                src_r[:, S2_LEN_HALF:S2_LEN, S2_LEN_HALF:S2_LEN])
     return combined
 
 
