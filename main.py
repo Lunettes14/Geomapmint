@@ -5,7 +5,7 @@ import numpy as np
 import rasterio
 import earthpy.plot as ep
 
-PATH = r'/home/iakhmetev/datasets/SEN12MS/ROIs2017_winter_s2/s2_21/ROIs2017_winter_s2_21_p'
+PATH = r'/home/aina/PycharmProjects/geomapmint/s2_21/ROIs2017_winter_s2_21_p'
 S2_BANDS = 13
 S2_LEN = 256
 S2_LEN_HALF = int(S2_LEN / 2)
