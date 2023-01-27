@@ -5,7 +5,7 @@ import numpy as np
 import rasterio
 import earthpy.plot as ep
 
-path = r'/home/aina/PycharmProjects/geomapmint/s2_21/ROIs2017_winter_s2_21_p'
+PATH = r'/home/aina/PycharmProjects/geomapmint/s2_21/ROIs2017_winter_s2_21_p'
 S2_BANDS = 13
 S2_LEN = 256
 S2_LEN_HALF = int(S2_LEN / 2)
@@ -35,7 +35,7 @@ def is_compatible(size, path, begin):
         return False
 
 
-def are_vertical_neighbours(top, bottom):
+def are_vertical_neighbours(top, bottom, path):
     with rasterio.open(path + f'{top}.tif') as src:
         q1 = src.bounds[3]
     with rasterio.open(path + f'{bottom}.tif') as src:
@@ -46,7 +46,7 @@ def are_vertical_neighbours(top, bottom):
         return False
 
 
-def are_horizontal_neighbours(left, right):
+def are_horizontal_neighbours(left, right, path):
     p1 = rasterio.open(path + f'{left}.tif').bounds[0]
     p2 = rasterio.open(path + f'{right}.tif').bounds[2]
     if p2 - p1 == S2_LEN_INTERSECTION:
@@ -96,5 +96,5 @@ def combine(size, path, begin):
     return combined
 
 
-s2 = combine(841, path, 30)
+s2 = combine(841, PATH, 30)
 ep.plot_rgb(s2, rgb=[3, 2, 1])
