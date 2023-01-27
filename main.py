@@ -5,7 +5,7 @@ import numpy as np
 import rasterio
 import earthpy.plot as ep
 
-PATH = r'/home/aina/PycharmProjects/geomapmint/s2_21/ROIs2017_winter_s2_21_p'
+PATH = r'/home/iakhmetev/datasets/SEN12MS/ROIs2017_winter_s2/s2_21/ROIs2017_winter_s2_21_p'
 S2_BANDS = 13
 S2_LEN = 256
 S2_LEN_HALF = int(S2_LEN / 2)
@@ -25,10 +25,10 @@ def is_compatible(size, path, begin):
     if read_dataset(size, path, begin):
         for j in range(0, 29 * int(math.sqrt(size)), 29):
             for i in range(begin + 1, begin + int(math.sqrt(size))):
-                if not are_horizontal_neighbours(i + j - 1, i + j):
+                if not are_horizontal_neighbours(i + j - 1, i + j, path):
                     return False
         for j in range(int(math.sqrt(size)) - 1):
-            if not are_vertical_neighbours(begin + 29 * j, begin + 29 * (j + 1)):
+            if not are_vertical_neighbours(begin + 29 * j, begin + 29 * (j + 1), path):
                 return False
         return True
     else:
