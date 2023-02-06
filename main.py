@@ -4,35 +4,15 @@ from copy import deepcopy
 import numpy as np
 import rasterio
 import earthpy.plot as ep
+from pathlib import Path
 
+DIRECTORY = Path(r'/home/aina/PycharmProjects/geomapmint/s2_21')
 PATH = r'/home/aina/PycharmProjects/geomapmint/s2_21/ROIs2017_winter_s2_21_p'
 S2_BANDS = 13
 S2_LEN = 256
 S2_LEN_HALF = int(S2_LEN / 2)
 S2_SCALE = 10
 S2_LEN_INTERSECTION = int((S2_LEN + S2_LEN_HALF) * S2_SCALE)
-
-
-def read_dataset(size, path, begin):
-    for j in range(0, 29 * int(math.sqrt(size)), 29):
-        for i in range(begin, begin + int(math.sqrt(size))):
-            if not os.path.exists(path + f'{i + j}.tif'):
-                return False
-    return True
-
-
-def is_compatible(size, path, begin):
-    if read_dataset(size, path, begin):
-        for j in range(0, 29 * int(math.sqrt(size)), 29):
-            for i in range(begin + 1, begin + int(math.sqrt(size))):
-                if not are_horizontal_neighbours(i + j - 1, i + j, path):
-                    return False
-        for j in range(int(math.sqrt(size)) - 1):
-            if not are_vertical_neighbours(begin + 29 * j, begin + 29 * (j + 1), path):
-                return False
-        return True
-    else:
-        return False
 
 
 def are_vertical_neighbours(top, bottom, path):
@@ -55,11 +35,39 @@ def are_horizontal_neighbours(left, right, path):
         return False
 
 
+def get_dataset_width(path, begin):
+    for i in range(begin + 1, len(list(DIRECTORY.iterdir())) + begin):
+        if os.path.exists(path + f'{i}.tif') and are_vertical_neighbours(begin, i, PATH):
+            return i - begin
+
+
+def read_dataset(size, path, begin):
+    for j in range(0, DATASET_WIDTH * int(math.sqrt(size)), DATASET_WIDTH):
+        for i in range(begin, begin + int(math.sqrt(size))):
+            if not os.path.exists(path + f'{i + j}.tif'):
+                return False
+    return True
+
+
+def is_compatible(size, path, begin):
+    if read_dataset(size, path, begin):
+        for j in range(0, DATASET_WIDTH * int(math.sqrt(size)), DATASET_WIDTH):
+            for i in range(begin + 1, begin + int(math.sqrt(size))):
+                if not are_horizontal_neighbours(i + j - 1, i + j, path):
+                    return False
+        for j in range(int(math.sqrt(size)) - 1):
+            if not are_vertical_neighbours(begin + DATASET_WIDTH * j, begin + DATASET_WIDTH * (j + 1), path):
+                return False
+        return True
+    else:
+        return False
+
+
 def where_missing(size, path, begin):
     p = []
     for j in range(int(math.sqrt(size))):
         for i in range(int(math.sqrt(size))):
-            if not os.path.exists(path + f'{begin + i + 29 * j}.tif'):
+            if not os.path.exists(path + f'{begin + i + DATASET_WIDTH * j}.tif'):
                 p.append((j, i))
     return p
 
@@ -75,11 +83,14 @@ def cut_piece(i, j, src_r, combined):
         case 0, 0:
             combined[:, 0:S2_LEN, 0:S2_LEN] = deepcopy(src_r[:, 0:S2_LEN, 0:S2_LEN])
         case 0, j:
-            combined[:, 0:S2_LEN, S2_LEN + S2_LEN_HALF * (j - 1): S2_LEN + S2_LEN_HALF * j] = deepcopy(src_r[:, 0:S2_LEN, S2_LEN_HALF:S2_LEN])
+            combined[:, 0:S2_LEN, S2_LEN + S2_LEN_HALF * (j - 1): S2_LEN + S2_LEN_HALF * j] = deepcopy(
+                src_r[:, 0:S2_LEN, S2_LEN_HALF:S2_LEN])
         case i, 0:
-            combined[:, S2_LEN + S2_LEN_HALF * (i - 1): S2_LEN + S2_LEN_HALF * i, 0:S2_LEN] = deepcopy(src_r[:, S2_LEN_HALF:S2_LEN, 0:S2_LEN])
+            combined[:, S2_LEN + S2_LEN_HALF * (i - 1): S2_LEN + S2_LEN_HALF * i, 0:S2_LEN] = deepcopy(
+                src_r[:, S2_LEN_HALF:S2_LEN, 0:S2_LEN])
         case i, j:
-            combined[:, S2_LEN + S2_LEN_HALF * (i - 1): S2_LEN + S2_LEN_HALF * i, S2_LEN + S2_LEN_HALF * (j - 1): S2_LEN + S2_LEN_HALF * j] = deepcopy(
+            combined[:, S2_LEN + S2_LEN_HALF * (i - 1): S2_LEN + S2_LEN_HALF * i,
+            S2_LEN + S2_LEN_HALF * (j - 1): S2_LEN + S2_LEN_HALF * j] = deepcopy(
                 src_r[:, S2_LEN_HALF:S2_LEN, S2_LEN_HALF:S2_LEN])
     return combined
 
@@ -88,7 +99,7 @@ def combine(size, path, begin):
     combined = generate_base(size)
     for j in range(int(math.sqrt(size))):
         for i in range(int(math.sqrt(size))):
-            pic_number_str = f'{begin + j + 29 * i}.tif'
+            pic_number_str = f'{begin + j + DATASET_WIDTH * i}.tif'
             if os.path.exists(path + pic_number_str):
                 with rasterio.open(path + pic_number_str) as src:
                     src_r = src.read()
@@ -96,5 +107,6 @@ def combine(size, path, begin):
     return combined
 
 
+DATASET_WIDTH = get_dataset_width(PATH, 30)
 s2 = combine(841, PATH, 30)
 ep.plot_rgb(s2, rgb=[3, 2, 1])
