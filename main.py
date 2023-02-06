@@ -108,5 +108,5 @@ def combine(size, path, begin):
 
 
 DATASET_WIDTH = get_dataset_width(PATH, 30)
-s2 = combine(841, PATH, 30)
+s2 = combine(169, PATH, 30)
 ep.plot_rgb(s2, rgb=[3, 2, 1])
