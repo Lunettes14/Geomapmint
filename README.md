@@ -14,7 +14,7 @@
 
 Для установки программы воспользуйтесь командой:
 
-  git clone https://github.com/Lunettes14/Geomapmint.git
+    git clone https://github.com/Lunettes14/Geomapmint.git
 
 
 ## Требования
@@ -27,7 +27,7 @@
 
 ## Команда проекта
 
-- [Иван Ахметьев] — Senior Software Developer
-- [Айна Бабаева] — Junior Software Developer
+- Иван Ахметьев — Senior Software Developer
+- Айна Бабаева — Junior Software Developer
 
 
